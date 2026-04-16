@@ -1082,7 +1082,7 @@ export class RiscVCodeGen {
     this._emit('  slli a0, a0, 2');        // index * 4
     this._emit('  add a0, t0, a0');        // base + index * 4
     this._emit('  lw a0, 4(a0)');          // load [base + 4 + index * 4]
-    this._lastExprType = 'int'; // element type
+    this._lastExprType = 'unknown'; // Array elements can be any type (int, string, etc.)
   }
 
   _compileHashAccess(hashExpr, keyExpr) {
