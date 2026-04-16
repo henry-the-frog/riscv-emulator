@@ -1,7 +1,5 @@
-'use strict';
-
-const { Memory } = require('./memory');
-const { Registers, REG_NAMES } = require('./registers');
+import { Memory } from './memory.js';
+import { Registers, REG_NAMES } from './registers.js';
 
 /**
  * RISC-V RV32I CPU
@@ -399,4 +397,4 @@ class CPU {
   }
 }
 
-module.exports = { CPU, OP_LUI, OP_AUIPC, OP_JAL, OP_JALR, OP_BRANCH, OP_LOAD, OP_STORE, OP_IMM, OP_REG, OP_FENCE, OP_SYSTEM };
+export { CPU, OP_LUI, OP_AUIPC, OP_JAL, OP_JALR, OP_BRANCH, OP_LOAD, OP_STORE, OP_IMM, OP_REG, OP_FENCE, OP_SYSTEM };

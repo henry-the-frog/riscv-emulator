@@ -1,9 +1,7 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { TomasuloCPU } = require('./ooo');
-const { Assembler } = require('./assembler');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { TomasuloCPU } from './ooo.js';
+import { Assembler } from './assembler.js';
 
 function oooRun(source, maxCycles = 1000) {
   const asm = new Assembler();

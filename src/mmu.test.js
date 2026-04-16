@@ -1,14 +1,12 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { Memory } = require('./memory');
-const {
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { Memory } from './memory.js';
+import {
   PageTableEntry, TLB, MMU,
   setupIdentityPageTable,
   PTE_V, PTE_R, PTE_W, PTE_X, PTE_A, PTE_D,
   PAGE_SIZE
-} = require('./mmu');
+} from './mmu.js';
 
 // ============================================================
 // Page Table Entry Tests

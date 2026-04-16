@@ -1,12 +1,10 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const {
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
   AlwaysNotTaken, AlwaysTaken, BackwardTaken,
   OneBitPredictor, TwoBitPredictor, GSharePredictor, TournamentPredictor,
   PredictorBenchmark
-} = require('./branch-predictor');
+} from './branch-predictor.js';
 
 // ============================================================
 // Individual Predictor Tests

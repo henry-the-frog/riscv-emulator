@@ -1,9 +1,7 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { PipelineCPU } = require('./pipeline');
-const { Assembler } = require('./assembler');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { PipelineCPU } from './pipeline.js';
+import { Assembler } from './assembler.js';
 
 function pipeRun(source, opts = {}) {
   const asm = new Assembler();

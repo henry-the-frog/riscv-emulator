@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Minimal ELF32 Parser for RISC-V
  * 
@@ -247,4 +245,4 @@ class ELFLoader {
   }
 }
 
-module.exports = { ELFLoader, ELF_MAGIC, EM_RISCV, PT_LOAD, PF_R, PF_W, PF_X };
+export { ELFLoader, ELF_MAGIC, EM_RISCV, PT_LOAD, PF_R, PF_W, PF_X };

@@ -1,8 +1,6 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { Cache, CacheHierarchy } = require('./cache');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { Cache, CacheHierarchy } from './cache.js';
 
 // ============================================================
 // Cache Configuration Tests

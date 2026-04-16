@@ -1,10 +1,8 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { Assembler } = require('./assembler');
-const { CPU } = require('./cpu');
-const { Disassembler } = require('./disassembler');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { Assembler } from './assembler.js';
+import { CPU } from './cpu.js';
+import { disassembleWord } from './disassembler.js';
 
 function asmRun(source, maxCycles = 10000) {
   const asm = new Assembler();
@@ -227,17 +225,17 @@ test('M ext: isPrime check', () => {
 test('M ext: disassemble MUL', () => {
   const asm = new Assembler();
   const { words } = asm.assemble('mul a0, t0, t1');
-  assert.equal(Disassembler.disassemble(words[0]), 'mul a0, t0, t1');
+  assert.equal(disassembleWord(words[0]), 'mul a0, t0, t1');
 });
 
 test('M ext: disassemble DIV', () => {
   const asm = new Assembler();
   const { words } = asm.assemble('div a0, t0, t1');
-  assert.equal(Disassembler.disassemble(words[0]), 'div a0, t0, t1');
+  assert.equal(disassembleWord(words[0]), 'div a0, t0, t1');
 });
 
 test('M ext: disassemble REM', () => {
   const asm = new Assembler();
   const { words } = asm.assemble('rem a0, t0, t1');
-  assert.equal(Disassembler.disassemble(words[0]), 'rem a0, t0, t1');
+  assert.equal(disassembleWord(words[0]), 'rem a0, t0, t1');
 });

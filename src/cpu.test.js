@@ -1,10 +1,8 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { Memory } = require('./memory');
-const { Registers, REG_NAMES, REG_NUMBERS } = require('./registers');
-const { CPU } = require('./cpu');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { Memory } from './memory.js';
+import { Registers, REG_NAMES, REG_NUMBERS } from './registers.js';
+import { CPU } from './cpu.js';
 
 // ============================================================
 // Memory Tests

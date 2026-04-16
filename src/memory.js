@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * RISC-V Memory — byte-addressable, little-endian
  * Supports 8/16/32-bit loads and stores
@@ -103,4 +101,4 @@ class Memory {
   }
 }
 
-module.exports = { Memory };
+export { Memory };

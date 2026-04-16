@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * RISC-V Trap & Interrupt System
  * 
@@ -233,7 +231,7 @@ class TrapController {
   }
 }
 
-module.exports = {
+export {
   CSRFile, TrapController,
   CAUSE_MISALIGNED_FETCH, CAUSE_FETCH_ACCESS, CAUSE_ILLEGAL_INSTRUCTION,
   CAUSE_BREAKPOINT, CAUSE_MISALIGNED_LOAD, CAUSE_LOAD_ACCESS,

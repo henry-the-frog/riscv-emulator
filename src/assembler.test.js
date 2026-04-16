@@ -1,9 +1,7 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { Assembler } = require('./assembler');
-const { CPU } = require('./cpu');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { Assembler } from './assembler.js';
+import { CPU } from './cpu.js';
 
 // Helper: assemble and run
 function asmRun(source, maxCycles = 10000) {

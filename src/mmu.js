@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * RISC-V Virtual Memory — Sv32 (2-level page table)
  * 
@@ -318,7 +316,7 @@ function setupIdentityPageTable(memory, baseAddr, sizeInPages, flags = PTE_V | P
   return baseAddr;
 }
 
-module.exports = {
+export {
   PageTableEntry, TLB, MMU,
   setupIdentityPageTable,
   PTE_V, PTE_R, PTE_W, PTE_X, PTE_U, PTE_G, PTE_A, PTE_D,

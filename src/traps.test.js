@@ -1,14 +1,12 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const {
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
   CSRFile, TrapController,
   CAUSE_ILLEGAL_INSTRUCTION, CAUSE_BREAKPOINT, CAUSE_ECALL_M,
   CAUSE_LOAD_PAGE_FAULT, CAUSE_STORE_PAGE_FAULT,
   CAUSE_SOFTWARE_INT, CAUSE_TIMER_INT, CAUSE_EXTERNAL_INT,
   MSTATUS_MIE, MSTATUS_MPIE, MIE_MSIE, MIE_MTIE, MIE_MEIE
-} = require('./traps');
+} from './traps.js';
 
 // ============================================================
 // CSR Tests

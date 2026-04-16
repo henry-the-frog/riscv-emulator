@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * RISC-V Branch Predictors
  * 
@@ -270,7 +268,7 @@ class PredictorBenchmark {
   }
 }
 
-module.exports = {
+export {
   AlwaysNotTaken, AlwaysTaken, BackwardTaken,
   OneBitPredictor, TwoBitPredictor, GSharePredictor, TournamentPredictor,
   PredictorBenchmark

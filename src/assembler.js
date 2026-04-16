@@ -1,6 +1,4 @@
-'use strict';
-
-const { REG_NUMBERS } = require('./registers');
+import { REG_NUMBERS } from './registers.js';
 
 /**
  * RISC-V RV32I Assembler
@@ -88,6 +86,7 @@ class Assembler {
 
   // Encode U-type
   static encU(opcode, rd, imm) {
+    // imm is already in upper-20-bit position (pre-shifted by caller)
     return (imm & 0xFFFFF000) | ((rd & 0x1F) << 7) | (opcode & 0x7F);
   }
 
@@ -471,4 +470,4 @@ class Assembler {
   }
 }
 
-module.exports = { Assembler };
+export { Assembler };

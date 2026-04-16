@@ -1,10 +1,8 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { ELFLoader } = require('./elf');
-const { Assembler } = require('./assembler');
-const { CPU } = require('./cpu');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { ELFLoader } from './elf.js';
+import { Assembler } from './assembler.js';
+import { CPU } from './cpu.js';
 
 // ============================================================
 // ELF Loader Tests

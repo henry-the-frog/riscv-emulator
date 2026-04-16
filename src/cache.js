@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Cache Simulator for RISC-V
  * 
@@ -270,4 +268,4 @@ class CacheHierarchy {
   }
 }
 
-module.exports = { Cache, CacheHierarchy, CacheLine, CacheSet };
+export { Cache, CacheHierarchy, CacheLine, CacheSet };

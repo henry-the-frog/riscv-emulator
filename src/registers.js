@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * RISC-V Register File — 32 registers (x0-x31)
  * x0 is hardwired to 0 (writes are discarded)
@@ -65,4 +63,4 @@ class Registers {
   }
 }
 
-module.exports = { Registers, REG_NAMES, REG_NUMBERS };
+export { Registers, REG_NAMES, REG_NUMBERS };
