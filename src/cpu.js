@@ -377,6 +377,10 @@ class CPU {
         this.halted = true;
         this.exitCode = a0;
         break;
+      case 200: // gc_collect — Cheney semi-space copying GC
+        // a0 = from_start, a1 = to_start, a2 = half_size
+        this._gcCollect(a0, a1, a2);
+        break;
       default:
         // Unknown syscall — ignore
         break;
@@ -394,6 +398,117 @@ class CPU {
       cycles: this.cycles,
       output: this.output.join('')
     };
+  }
+
+  /**
+   * Cheney semi-space copying GC (host-assisted)
+   * 
+   * Copies live objects from from-space to to-space.
+   * Scans stack and registers for roots.
+   * Updates all pointers in copied objects.
+   * After GC: gp points into to-space, from-space is free.
+   */
+  _gcCollect(fromStart, toStart, halfSize) {
+    const fromEnd = fromStart + halfSize;
+    const toEnd = toStart + halfSize;
+    
+    let scan = toStart;  // scan pointer in to-space
+    let free = toStart;  // free pointer in to-space
+    
+    const isHeapPtr = (val) => {
+      const v = val >>> 0;
+      return v >= fromStart && v < fromEnd;
+    };
+    
+    // Copy an object from from-space to to-space
+    const copy = (ptr) => {
+      const p = ptr >>> 0;
+      if (!isHeapPtr(p)) return ptr;
+      
+      // Read header at ptr - 4
+      const header = this.mem.loadWord((p - 4) >>> 0);
+      const tag = (header >>> 28) & 0xF;
+      
+      // Check if already forwarded
+      if (tag === 0xF) {
+        // Forwarding pointer: header low bits are the new location
+        return header & 0x0FFFFFFF;
+      }
+      
+      const totalSize = header & 0x0FFFFFFF;
+      const objectSize = totalSize - 4;
+      
+      // Copy header + object to to-space
+      this.mem.storeWord(free >>> 0, header);
+      for (let i = 0; i < objectSize; i += 4) {
+        const word = this.mem.loadWord((p + i) >>> 0);
+        this.mem.storeWord((free + 4 + i) >>> 0, word);
+      }
+      
+      const newPtr = (free + 4) >>> 0; // past header in to-space
+      free = (free + totalSize) >>> 0;
+      
+      // Leave forwarding pointer in old location
+      const forwardHeader = (0xF << 28) | newPtr;
+      this.mem.storeWord((p - 4) >>> 0, forwardHeader >>> 0);
+      
+      return newPtr;
+    };
+    
+    // Phase 1: Scan roots (registers)
+    for (let r = 0; r < 32; r++) {
+      const val = this.regs.get(r);
+      if (isHeapPtr(val)) {
+        this.regs.set(r, copy(val));
+      }
+    }
+    
+    // Phase 1b: Scan stack for roots
+    const sp = this.regs.get(2) >>> 0; // stack pointer
+    const stackTop = 0x7FFFFFF0; // top of stack (approximate)
+    for (let addr = sp; addr < stackTop && addr < sp + 4096; addr += 4) {
+      const val = this.mem.loadWord(addr);
+      if (isHeapPtr(val)) {
+        this.mem.storeWord(addr, copy(val));
+      }
+    }
+    
+    // Phase 2: Scan copied objects for interior pointers (Cheney scan)
+    while (scan < free) {
+      const header = this.mem.loadWord(scan >>> 0);
+      const tag = (header >>> 28) & 0xF;
+      const totalSize = header & 0x0FFFFFFF;
+      const objectStart = (scan + 4) >>> 0;
+      const objectSize = totalSize - 4;
+      
+      // Scan each word in the object for heap pointers
+      // For strings (tag 1), skip char data (not pointers)
+      if (tag !== 0x1) { // Not a string — scan all words
+        for (let i = 0; i < objectSize; i += 4) {
+          const val = this.mem.loadWord((objectStart + i) >>> 0);
+          if (isHeapPtr(val)) {
+            this.mem.storeWord((objectStart + i) >>> 0, copy(val));
+          }
+        }
+      }
+      // For strings: only scan the length word (first 4 bytes), chars are not pointers
+      // Actually skip entirely — strings have no interior pointers
+      
+      scan = (scan + totalSize) >>> 0;
+    }
+    
+    // Phase 3: Update gp to point to free in to-space
+    this.regs.set(3, free);  // gp = x3
+    
+    // Phase 4: Update tp to new from-space limit
+    // After GC, to-space becomes from-space
+    // tp = toStart + halfSize = toEnd
+    this.regs.set(4, toEnd);  // tp = x4
+    
+    // Store GC stats
+    this.gcCollections = (this.gcCollections || 0) + 1;
+    this.gcBytesRecovered = (this.gcBytesRecovered || 0) + 
+      ((fromEnd - fromStart) - (free - toStart));
   }
 }
 

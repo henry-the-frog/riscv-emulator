@@ -40,8 +40,8 @@ export class RiscVCodeGen {
     this.usedRegs = new Set(); // Which s-registers are in use (for save/restore)
     
     // Heap allocation
-    this.heapBase = 0x10000;  // Heap starts at 64KB
-    this.heapSize = 0x10000;  // 64KB heap (32KB per semi-space for GC)
+    this.heapBase = options.heapBase || 0x10000;  // Heap starts at 64KB
+    this.heapSize = options.heapSize || 0x10000;  // 64KB heap (32KB per semi-space for GC)
     this.needsHeap = false;   // Set true if any heap allocation needed
     this.needsAlloc = false;  // Set true if _alloc subroutine needed
     this.needsGC = false;     // Set true if GC subroutine needed
@@ -224,8 +224,15 @@ export class RiscVCodeGen {
     // Prologue: set up main frame
     this._emit('  # Monkey → RISC-V compiled program');
     this._emitLabel('_start');
-    // Initialize heap pointer (gp = x3)
+    // Initialize heap pointer (gp = x3) — from-space starts at heapBase
     this._emit(`  li gp, ${this.heapBase}`);
+    // Store semi-space boundaries in memory for GC
+    // from_start = heapBase
+    // from_end = heapBase + heapSize/2
+    // to_start = heapBase + heapSize/2
+    // to_end = heapBase + heapSize
+    const halfHeap = this.heapSize / 2;
+    this._emit(`  li tp, ${this.heapBase + halfHeap}`);  // tp = from-space limit (used for GC trigger)
     this._emitPrologue();
 
     // First pass: register all top-level function names (enables mutual recursion)
@@ -263,6 +270,29 @@ export class RiscVCodeGen {
       this._emit('# Bump allocator with GC header: a1 = size in bytes, a2 = type tag');
       this._emit('# Returns pointer in a0 (past the header)');
       this._emitLabel('_alloc');
+      // Check if we need GC: gp + size + 4 > tp?
+      this._emit('  add t0, gp, a1');
+      this._emit('  addi t0, t0, 4');       // +4 for header
+      this._emit('  blt t0, tp, _alloc_ok'); // if gp+size+4 < tp, proceed
+      // GC trigger: call ecall 200 (gc_collect)
+      // Save caller regs
+      this._emit('  addi sp, sp, -16');
+      this._emit('  sw a1, 0(sp)');
+      this._emit('  sw a2, 4(sp)');
+      this._emit('  sw ra, 8(sp)');
+      const halfHeap = this.heapSize / 2;
+      this._emit(`  li a0, ${this.heapBase}`);         // from_start
+      this._emit(`  li a1, ${this.heapBase + halfHeap}`); // to_start
+      this._emit(`  li a2, ${halfHeap}`);              // half_size
+      this._emit('  li a7, 200');
+      this._emit('  ecall');                            // GC collect!
+      // After GC: gp and tp are updated by the collector
+      // Swap from/to for next GC (the collector swaps the spaces)
+      this._emit('  lw a1, 0(sp)');
+      this._emit('  lw a2, 4(sp)');
+      this._emit('  lw ra, 8(sp)');
+      this._emit('  addi sp, sp, 16');
+      this._emitLabel('_alloc_ok');
       // Write header: (tag << 28) | (size + 4)
       this._emit('  addi t0, a1, 4');      // total size = object + header
       this._emit('  slli t1, a2, 28');      // tag << 28
