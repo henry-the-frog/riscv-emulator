@@ -1421,6 +1421,7 @@ export class RiscVCodeGen {
     const savedNextReg = this.nextRegIdx;
     const savedUsedRegs = new Set(this.usedRegs);
     const savedVarTypes = new Map(this.varTypes);
+    const savedPrologueSaveIdx = this._prologueSaveIdx;
     
     this.output = [];
     this.variables = new Map();
@@ -1507,6 +1508,7 @@ export class RiscVCodeGen {
     this.nextRegIdx = savedNextReg;
     this.usedRegs = savedUsedRegs;
     this.varTypes = savedVarTypes;
+    this._prologueSaveIdx = savedPrologueSaveIdx;
     
     this.functions.push(funcBody);
     
@@ -1776,6 +1778,7 @@ export class RiscVCodeGen {
     const savedOffset = this.stackOffset;
     const savedNextReg = this.nextRegIdx;
     const savedUsedRegs = new Set(this.usedRegs);
+    const savedPrologueSaveIdx2 = this._prologueSaveIdx;
     
     this.output = [];
     this.variables = new Map();
@@ -1858,6 +1861,7 @@ export class RiscVCodeGen {
     this.usedRegs = savedUsedRegs;
     this._currentFuncName = savedCurrentFunc;
     this._currentFuncParams = savedCurrentFuncParams;
+    this._prologueSaveIdx = savedPrologueSaveIdx2;
     
     this.functions.push(funcBody);
   }
