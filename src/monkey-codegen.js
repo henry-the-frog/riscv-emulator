@@ -487,9 +487,39 @@ export class RiscVCodeGen {
         return;
       }
       
-      // TODO: General tail call for other named functions
-      // Requires understanding closure calling convention (heap-allocated closures
-      // contain code pointers that need to be extracted before jumping)
+      // General tail call optimization for named functions
+      // If the callee is a known non-closure function, we can tail-call it
+      const calleeType = this.varTypes.get(callee);
+      const isBuiltin = ['puts', 'len', 'first', 'last', 'push', 'rest', 'type'].includes(callee);
+      const isClosureCall = calleeType === 'closure';
+      
+      if (!isBuiltin && !isClosureCall) {
+        // General tail call: tear down our frame and jump to target
+        this._comment(`tail call to ${callee}`);
+        const args = stmt.returnValue.arguments;
+        
+        // Compile all arguments first, saving to stack to avoid clobbering
+        for (let i = 0; i < args.length; i++) {
+          this._compileExpression(args[i]);
+          this._emit('  addi sp, sp, -4');
+          this._emit('  sw a0, 0(sp)');
+        }
+        
+        // Pop into argument registers (reverse order to match calling convention)
+        for (let i = args.length - 1; i >= 0; i--) {
+          this._emit(`  lw a${i}, ${(args.length - 1 - i) * 4}(sp)`);
+        }
+        if (args.length > 0) {
+          this._emit(`  addi sp, sp, ${args.length * 4}`);
+        }
+        
+        // Tear down our stack frame (epilogue without ret)
+        this._emitEpilogue();
+        
+        // Jump (not call) to the target function
+        this._emit(`  j ${callee}`);
+        return;
+      }
     }
     
     this._comment('return');
