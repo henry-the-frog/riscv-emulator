@@ -520,6 +520,40 @@ export class RiscVCodeGen {
         this._emit(`  j ${callee}`);
         return;
       }
+      
+      // Closure tail call optimization
+      if (isClosureCall && !isBuiltin) {
+        this._comment(`tail call to closure ${callee}`);
+        const args = stmt.returnValue.arguments;
+        
+        // Compile all arguments and save to stack
+        for (let i = 0; i < args.length; i++) {
+          this._compileExpression(args[i]);
+          this._emit('  addi sp, sp, -4');
+          this._emit('  sw a0, 0(sp)');
+        }
+        
+        // Load closure pointer and save to stack
+        this._emitLoadVar(callee);
+        this._emit('  addi sp, sp, -4');
+        this._emit('  sw a0, 0(sp)');
+        
+        // Pop closure ptr into a0, args into a1, a2, ...
+        // Closure dispatch expects: a0=closure_ptr, a1=arg0, a2=arg1, ...
+        this._emit('  lw a0, 0(sp)');  // closure ptr
+        for (let i = 0; i < args.length; i++) {
+          this._emit(`  lw a${i + 1}, ${(args.length - i) * 4}(sp)`);
+        }
+        this._emit(`  addi sp, sp, ${(args.length + 1) * 4}`);
+        
+        // Tear down our stack frame (epilogue without ret)
+        this._emitEpilogue();
+        
+        // Jump to closure dispatch trampoline
+        this._emit('  j _closure_dispatch');
+        this.needsClosureDispatch = true;
+        return;
+      }
     }
     
     this._comment('return');
